@@ -1,0 +1,20 @@
+{
+  "_설명": "주제별 발굴 목록에 쓸 주제와 검색어. 검색어 하나당 하루 100점을 쓴다(무료 한도 10,000점).",
+  "days": 7,
+  "region": "KR",
+  "language": "ko",
+  "topics": [
+    {"id": "idol", "name": "연예·아이돌", "keywords": ["아이돌 예능", "연예인 비하인드"]},
+    {"id": "sports", "name": "스포츠", "keywords": ["스포츠 예능", "야구 웃긴 장면"]},
+    {"id": "food", "name": "먹방·요리", "keywords": ["먹방", "자취 요리"]},
+    {"id": "pet", "name": "반려동물", "keywords": ["강아지", "고양이"]},
+    {"id": "money", "name": "경제·재테크", "keywords": ["재테크", "주식 초보"]},
+    {"id": "story", "name": "사연·이슈", "keywords": ["사연", "참교육"]},
+    {"id": "trot", "name": "트로트", "keywords": ["트로트"]},
+    {"id": "game", "name": "게임", "keywords": ["게임 웃긴"]},
+    {"id": "beauty", "name": "뷰티·패션", "keywords": ["메이크업", "코디 추천"]},
+    {"id": "family", "name": "육아·가족", "keywords": ["육아", "아기"]},
+    {"id": "knowledge", "name": "지식·자기계발", "keywords": ["지식", "심리학"]},
+    {"id": "travel", "name": "여행", "keywords": ["여행 브이로그"]}
+  ]
+}

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>레퍼런스 발굴기</title>
+<meta name="description" content="구독자는 적은데 조회수가 잘 나온 유튜브 영상을 주제별·키워드별로 찾는 무료 도구">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔎</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>레퍼런스 발굴기</h1>
+  <p class="sub">구독자는 적은데 조회수가 터진 영상을 찾아 내 쇼츠 기획으로 바꿉니다.</p>
+  <nav class="tabs" role="tablist">
+    <button class="tab" data-tab="topic">오늘의 주제별</button>
+    <button class="tab" data-tab="keyword">키워드로 찾기</button>
+    <button class="tab" data-tab="guide">사용법</button>
+  </nav>
+</header>
+
+<main>
+  <section class="panel" data-panel="topic">
+    <div id="topic-chips" class="chips"></div>
+    <p id="topic-meta" class="meta"></p>
+    <p class="hint">이 목록은 하루 한 번 미리 뽑아 둔 것이라 내 점수를 쓰지 않습니다.</p>
+  </section>
+
+  <section class="panel" data-panel="keyword" hidden>
+    <div class="keybox">
+      <label for="k-key">내 무료 열쇠(API 키)</label>
+      <div class="row">
+        <input id="k-key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza로 시작하는 열쇠를 붙여 넣으세요">
+        <button id="k-save" type="button" class="ghost">저장</button>
+      </div>
+      <label class="check"><input id="k-show" type="checkbox"> 열쇠 보이기</label>
+      <p class="hint">열쇠는 이 브라우저에만 저장되고 유튜브 말고는 어디에도 보내지 않습니다. 받는 방법은 「사용법」 탭에 있습니다.</p>
+    </div>
+    <form id="k-form" class="kform">
+      <input id="k-q" type="search" placeholder="예: 자취 요리, 강아지 산책, 아이돌 예능" required>
+      <select id="k-days" aria-label="기간">
+        <option value="3">최근 3일</option>
+        <option value="7" selected>최근 7일</option>
+        <option value="30">최근 30일</option>
+        <option value="90">최근 90일</option>
+      </select>
+      <select id="k-order" aria-label="검색 순서">
+        <option value="viewCount" selected>조회수 많은 순으로 모으기</option>
+        <option value="relevance">관련도 순으로 모으기</option>
+        <option value="date">최신 순으로 모으기</option>
+      </select>
+      <select id="k-pages" aria-label="검색 양">
+        <option value="1" selected>50개 살펴보기</option>
+        <option value="2">100개 살펴보기</option>
+        <option value="3">150개 살펴보기</option>
+      </select>
+      <label class="check"><input id="k-outlier" type="checkbox" checked> 채널 평소 대비도 계산</label>
+      <button id="k-go" type="submit" class="primary">찾기</button>
+    </form>
+    <p id="k-cost" class="hint"></p>
+    <p id="quota" class="hint"></p>
+  </section>
+
+  <section class="panel guide" data-panel="guide" hidden>
+    <h2>이렇게 고릅니다</h2>
+    <ul>
+      <li><b>구독 대비</b> = 조회수 ÷ 구독자 수. 구독자 1만 명 채널에서 50만 회가 나오면 50배입니다. 구독자 덕이 아니라 영상 자체가 퍼졌다는 뜻입니다.</li>
+      <li><b>평소 대비</b> = 이 영상 조회수 ÷ 그 채널 최근 20편 조회수의 가운데 값. 그 채널에서도 유독 터진 영상인지 봅니다.</li>
+      <li>구독자를 숨긴 채널은 구독 대비를 셀 수 없어 기본으로 뺍니다(필터에서 켤 수 있음).</li>
+      <li>유튜브가 구독자 수를 반올림해서 알려 주므로 배수는 대략치입니다.</li>
+    </ul>
+
+    <h2>무료 열쇠(API 키) 받기 — 5분</h2>
+    <ol>
+      <li><a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">구글 클라우드 콘솔</a>에 구글 계정으로 들어가 새 프로젝트를 만듭니다(이름 아무거나). 결제 정보는 넣지 않아도 됩니다.</li>
+      <li><a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">YouTube Data API v3</a> 화면에서 「사용」을 누릅니다.</li>
+      <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">사용자 인증 정보</a> → 「사용자 인증 정보 만들기」 → 「API 키」를 누르면 열쇠가 나옵니다.</li>
+      <li>안전을 위해 열쇠 옆 「키 수정」에서
+        <ul>
+          <li>「API 제한사항」 → 「키 제한」 → YouTube Data API v3 만 고릅니다.</li>
+          <li>「애플리케이션 제한사항」 → 「웹사이트」 → 이 페이지 주소(<code id="site-origin"></code>)를 넣습니다.</li>
+        </ul>
+      </li>
+      <li>열쇠를 복사해 「키워드로 찾기」 탭에 붙여 넣고 저장합니다.</li>
+    </ol>
+
+    <h2>하루 한도</h2>
+    <p>열쇠 하나에 하루 10,000점이 무료입니다. 검색 한 번(50개)이 약 100점이라 하루 약 90번 찾을 수 있습니다. 한국시간 오후 4~5시쯤 다시 채워집니다. 돈이 나가는 일은 없습니다.</p>
+
+    <h2>쇼츠로 바꿀 때 지킬 것</h2>
+    <ul>
+      <li>찾은 영상은 <b>구성을 배우는 참고용</b>입니다. 내려받아 다시 올리면 저작권 신고와 채널 정지를 받을 수 있습니다.</li>
+      <li>「쇼츠 기획 메모 복사」를 눌러 첫 2초·반전·결말을 직접 보고 적은 뒤, 내가 찍었거나 쓸 권리가 있는 원본으로 만드세요.</li>
+      <li>제목만 보고 짐작하지 말고 영상을 끝까지 보고 적으세요.</li>
+    </ul>
+  </section>
+
+  <section id="filters" class="filters" aria-label="조건">
+    <label>구독자 최대
+      <select id="f-maxSubs">
+        <option value="1000">1천 명</option>
+        <option value="5000">5천 명</option>
+        <option value="10000">1만 명</option>
+        <option value="50000" selected>5만 명</option>
+        <option value="100000">10만 명</option>
+        <option value="300000">30만 명</option>
+        <option value="0">제한 없음</option>
+      </select>
+    </label>
+    <label>조회수 최소
+      <select id="f-minViews">
+        <option value="0">제한 없음</option>
+        <option value="10000">1만 회</option>
+        <option value="50000" selected>5만 회</option>
+        <option value="100000">10만 회</option>
+        <option value="500000">50만 회</option>
+        <option value="1000000">100만 회</option>
+      </select>
+    </label>
+    <label>구독 대비 최소
+      <select id="f-minRatio">
+        <option value="0">제한 없음</option>
+        <option value="2">2배</option>
+        <option value="5" selected>5배</option>
+        <option value="10">10배</option>
+        <option value="50">50배</option>
+        <option value="100">100배</option>
+      </select>
+    </label>
+    <label>평소 대비 최소
+      <select id="f-minOutlier">
+        <option value="0" selected>제한 없음</option>
+        <option value="2">2배</option>
+        <option value="3">3배</option>
+        <option value="5">5배</option>
+        <option value="10">10배</option>
+      </select>
+    </label>
+    <label>길이
+      <select id="f-length">
+        <option value="all" selected>전체</option>
+        <option value="short">쇼츠(3분 이하)</option>
+        <option value="long">롱폼(3분 넘음)</option>
+      </select>
+    </label>
+    <label>정렬
+      <select id="f-sort">
+        <option value="ratio" selected>구독 대비 높은 순</option>
+        <option value="outlier">평소 대비 높은 순</option>
+        <option value="views">조회수 많은 순</option>
+        <option value="recent">최신 순</option>
+      </select>
+    </label>
+    <label class="check"><input id="f-hidden" type="checkbox"> 구독자 숨긴 채널도 보기</label>
+    <button id="f-reset" type="button" class="ghost">기본값</button>
+  </section>
+
+  <p id="status" class="status" role="status"></p>
+
+  <section id="results-wrap">
+    <p id="count" class="meta"></p>
+    <div id="results" class="grid"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>영상 정보는 YouTube API 서비스로 가져옵니다. 이 도구를 쓰면 <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube 서비스 약관</a>에 동의하는 것으로 봅니다. · <a href="privacy.html">개인정보 안내</a> · <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a></p>
+</footer>
+<script>document.getElementById("site-origin").textContent = location.origin + "/*";</script>
+<script src="app.js"></script>
+</body>
+</html>

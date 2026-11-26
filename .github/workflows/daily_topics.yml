@@ -1,0 +1,43 @@
+# 매일 주제별 목록을 새로 만들어 web/data/topics.json 에 덮어쓰고, web 폴더를 GitHub Pages 로 배포한다.
+# 저장소 Settings → Secrets and variables → Actions 에 REF_FINDER_API_KEY 를 넣어야 돈다.
+name: daily-topics
+
+on:
+  schedule:
+    - cron: "0 21 * * *"   # 매일 한국시간 06:00
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-topics
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 주제별 목록 만들기
+        env:
+          REF_FINDER_API_KEY: ${{ secrets.REF_FINDER_API_KEY }}
+        run: python builder/build_topics.py
+      - name: 바뀐 목록 저장
+        run: |
+          git config user.name "ref-finder-bot"
+          git config user.email "ref-finder-bot@users.noreply.github.com"
+          git add web/data/topics.json
+          git diff --cached --quiet || git commit -m "주제별 목록 갱신 $(date -u +%F)"
+          git push
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deploy
+        uses: actions/deploy-pages@v4
